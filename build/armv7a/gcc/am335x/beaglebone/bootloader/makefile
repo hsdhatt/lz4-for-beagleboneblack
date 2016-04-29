@@ -73,7 +73,7 @@ START_ADDR=0x402F0400
 APP=${ROOT}bootloader/
 APP_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/${DEVICE}/${EVM}/$(APPDIR)
 
-CFLAGS+=-D $(BOOT) -D $(DEVICE)  -I$(APP)include -I$(APP)/include/${TARGET}/${DEVICE}
+CFLAGS+=-D $(BOOT) -D $(DEVICE) -D "bb_black" -I$(APP)include -I$(APP)/include/${TARGET}/${DEVICE}
 
 #
 # Application source files
@@ -107,7 +107,8 @@ APP_SRC=$(SOURCE) $(COMMON)
 #
 APP_LIB=-ldrivers  \
 	-lutils    \
-	-lplatform 
+	-lplatform \
+	-llz4
 ifeq ($(BOOT), MMCSD)
 APP_LIB+=-lmmcsd
 endif

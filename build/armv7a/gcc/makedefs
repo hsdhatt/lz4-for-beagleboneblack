@@ -40,7 +40,10 @@
 # Toolchain/library path. LIB_PATH is an exported environmental variable which
 # shall point to the installation of toolchain
 #
-LIB_GCC=${LIB_PATH}/lib/gcc/arm-none-eabi/4.7.3/
+#LIB_GCC=${LIB_PATH}/lib/gcc/arm-none-eabi/4.7.3/
+#LIB_C=${LIB_PATH}/arm-none-eabi/lib/
+LIB_PATH=/usr
+LIB_GCC=${LIB_PATH}/lib/gcc/arm-none-eabi/4.9.3/
 LIB_C=${LIB_PATH}/arm-none-eabi/lib/
 
 #
@@ -48,7 +51,7 @@ LIB_C=${LIB_PATH}/arm-none-eabi/lib/
 #
 TARGET=armv7a
 COMPILER=gcc
-BOOT=MMCSD
+BOOT=UART
 
 #
 # Default Console type is set to UART to redirect all I/O operations
@@ -76,6 +79,7 @@ GRLIB_BLD=${ROOT}/build/${TARGET}/${COMPILER}/grlib
 NANDLIB_BLD=${ROOT}/build/${TARGET}/${COMPILER}/nandlib
 MMCSDLIB_BLD=${ROOT}/build/${TARGET}/${COMPILER}/mmcsdlib
 NORLIB_BLD=${ROOT}/build/${TARGET}/${COMPILER}/norlib
+LZ4LIB_BLD=${ROOT}/build/${TARGET}/${COMPILER}/lz4lib
 
 #
 # Pre/recompiled library paths
@@ -89,7 +93,8 @@ USBLIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/${DEVICE}/usblib
 GRLIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/grlib
 NANDLIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/nandlib
 MMCSDLIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/mmcsdlib
-NORLIB_BLD=${ROOT}/binary/${TARGET}/${COMPILER}/norlib
+NORLIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/norlib
+LZ4LIB_BIN=${ROOT}/binary/${TARGET}/${COMPILER}/lz4
 
 #
 # Source code paths
@@ -105,6 +110,7 @@ NANDLIB_SRC=${ROOT}/nandlib
 MMCSDLIB_SRC=${ROOT}/mmcsdlib
 FATFS_SRC=${ROOT}/third_party/fatfs
 NORLIB_SRC=${ROOT}/norlib
+LZ4LIB_SRC=${ROOT}/lz4lib
 
 #
 # Include paths
@@ -137,7 +143,8 @@ LPATH=-L"${LIB_C}" \
       -L${GRLIB_BIN}/${TARGET_MODE} \
       -L${NANDLIB_BIN}/${TARGET_MODE} \
       -L${MMCSDLIB_BIN}/${TARGET_MODE} \
-      -L${NORLIB_BIN}/${TARGET_MODE}
+      -L${NORLIB_BIN}/${TARGET_MODE} \
+      -L${LZ4LIB_BIN}/${TARGET_MODE} 
 
 #
 # C compilation options
@@ -166,7 +173,7 @@ endif
 
 CFLAGS=-mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a
 CFLAGS+=-c ${${TARGET_MODE}_FLAG} -mlong-calls -fdata-sections -funsigned-char \
-            -ffunction-sections -Wall ${IPATH} -Dgcc ${DEVICE_D} ${EVM_D} \
+            -ffunction-sections  ${IPATH} -Dgcc ${DEVICE_D} ${EVM_D} \
             -D SUPPORT_UNALIGNED -D ${BOOT} -D${CONSOLE}
 #
 # Defining the cross compiler tool prefix
