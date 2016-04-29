@@ -194,14 +194,27 @@ static unsigned int NANDBootCopy(void)
 
 **/
 
+#define UART_DDR_ADDR 0x81000000
+#define COMPRESSION_MAGIC 0xFEEDFEED
+#define BLOCK_SIZE 16*1024
+
+struct compression_header {
+        unsigned int magic;
+        unsigned int compressed_size;
+        unsigned int size;
+};
+
+
 #ifdef UART
 static unsigned int UARTBootCopy(void)
 {
     unsigned int retVal = true;
+    struct compression_header hdr;
+    unsigned char *ram_src, *ram_dst;
 
     UARTPuts("\nPlease transfer file:\n", -1);
 
-    if( 0 > xmodemReceive((unsigned char *)DDR_START_ADDR,
+    if( 0 > xmodemReceive((unsigned char *)UART_DDR_ADDR,
                           BL_UART_MAX_IMAGE_SIZE))
     {
         UARTPuts("\nXmodem receive error\n", -1);
@@ -209,6 +222,24 @@ static unsigned int UARTBootCopy(void)
     }
 
     UARTPuts("\nCopying application image from UART to RAM is  done\n", -1);
+
+    ram_src = (unsigned char *)(UART_DDR_ADDR);
+    ram_dst = (unsigned char *)(DDR_START_ADDR);
+
+    while(1) {
+        memcpy_unaligned(&hdr, ram_src, sizeof(hdr));
+
+        if (hdr.magic != COMPRESSION_MAGIC)
+                break;
+
+        ram_src += sizeof(hdr);
+
+        retVal = LZ4_decompress_safe(ram_src, ram_dst, hdr.compressed_size, hdr.size);
+
+        ram_src += hdr.compressed_size;
+        ram_dst += hdr.size;
+   }
+
 
     entryPoint  = DDR_START_ADDR;
 
